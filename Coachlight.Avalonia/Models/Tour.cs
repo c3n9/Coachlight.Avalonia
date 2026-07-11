@@ -3,7 +3,7 @@ namespace Coachlight.Avalonia.Models;
 /// <summary>
 /// The sequence of steps and its identifier.
 /// </summary>
-public class Tour
+public sealed class Tour
 {
     public string Id { get; }
     public IReadOnlyList<TourStep> Steps { get; }
