@@ -27,5 +27,5 @@ public sealed class TourStep
     public Action? OnExit { get; init; }
     
     // If there is no goal, we show it in the center.
-    public bool IsModal => TargetId is not null && TargetProvider is not null;
+    public bool IsModal => TargetId is null && TargetProvider is null;
 }
