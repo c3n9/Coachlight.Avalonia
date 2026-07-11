@@ -17,10 +17,9 @@ public class Tour
             throw new ArgumentException($"'{nameof(id)}' cannot be null or whitespace.", nameof(id));
         }
 
-        if (steps is null || steps.Any(s => s is null))
-        {
-            throw new ArgumentNullException($"'{nameof(steps)}' cannot be null.", nameof(steps));
-        }
+        ArgumentNullException.ThrowIfNull(steps);                  
+        if (steps.Any(s => s is null))
+            throw new ArgumentException("Steps cannot contain null.", nameof(steps)); 
         
         Id = id;
         Steps = steps.ToList().AsReadOnly();
