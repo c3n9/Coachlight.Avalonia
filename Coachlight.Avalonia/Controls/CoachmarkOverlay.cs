@@ -22,7 +22,7 @@ internal sealed class CoachmarkOverlay : Canvas
     {
         _controller = controller ?? throw new ArgumentNullException(nameof(controller));
 
-        _dim.Fill = new SolidColorBrush(Color.Parse("#B3000000"));
+        _dim.Bind(SpotlightDim.FillProperty, this.GetResourceObservable("CoachlightDimBrush"));
         Children.Add(_dim);
         Children.Add(_card);
 
