@@ -16,8 +16,9 @@ internal sealed class CoachmarkOverlay : Canvas
     private readonly SpotlightDim _dim = new SpotlightDim();
     private readonly CoachmarkCard _card = new CoachmarkCard();
     private OverlayLayer? _layer;
-    
-    
+    private IDisposable? _layerBoundsSub;
+
+
     public CoachmarkOverlay(TourController controller)
     {
         _controller = controller ?? throw new ArgumentNullException(nameof(controller));
@@ -39,6 +40,15 @@ internal sealed class CoachmarkOverlay : Canvas
         if (_layer is null) return;
 
         _layer.Children.Add(this);
+
+        Width = _layer.Bounds.Width;
+        Height = _layer.Bounds.Height;
+        _layerBoundsSub = _layer.GetObservable(BoundsProperty).Subscribe(new BoundsObserver(rect =>
+        {
+            Width = rect.Width;
+            Height = rect.Height;
+        }));
+
         _controller.CurrentStepChanged += OnCurrentStepChanged;
         _controller.Ended += OnEnded;
     }
@@ -47,6 +57,8 @@ internal sealed class CoachmarkOverlay : Canvas
     {
         _controller.CurrentStepChanged -= OnCurrentStepChanged;
         _controller.Ended -= OnEnded;
+        _layerBoundsSub?.Dispose();
+        _layerBoundsSub = null;
         if (_layer is not null)
         {
             _layer.Children.Remove(this);
@@ -145,5 +157,14 @@ internal sealed class CoachmarkOverlay : Canvas
         var cs = _card.DesiredSize;
         Canvas.SetLeft(_card, (Bounds.Width - cs.Width) / 2);
         Canvas.SetTop(_card, (Bounds.Height - cs.Height) / 2);
+    }
+
+    private sealed class BoundsObserver : IObserver<Rect>
+    {
+        private readonly Action<Rect> _onNext;
+        public BoundsObserver(Action<Rect> onNext) => _onNext = onNext;
+        public void OnCompleted() { }
+        public void OnError(Exception error) { }
+        public void OnNext(Rect value) => _onNext(value);
     }
 }
