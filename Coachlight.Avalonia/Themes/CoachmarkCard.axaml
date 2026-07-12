@@ -1,0 +1,70 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Coachlight.Avalonia.Controls"
+                    xmlns:conv="using:Avalonia.Data.Converters">
+
+    <SolidColorBrush x:Key="CoachlightCardBackgroundBrush" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="CoachlightCardBorderBrush" Color="#22000000"/>
+    <SolidColorBrush x:Key="CoachlightForegroundBrush" Color="#FF1A1A1A"/>
+    <SolidColorBrush x:Key="CoachlightSecondaryForegroundBrush" Color="#FF6B6B6B"/>
+    <SolidColorBrush x:Key="CoachlightAccentBrush" Color="#FF3B82F6"/>
+    <SolidColorBrush x:Key="CoachlightAccentForegroundBrush" Color="#FFFFFFFF"/>
+
+    <ControlTheme x:Key="{x:Type controls:CoachmarkCard}" TargetType="controls:CoachmarkCard">
+        <Setter Property="Background" Value="{DynamicResource CoachlightCardBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CoachlightCardBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="18"/>
+        <Setter Property="Foreground" Value="{DynamicResource CoachlightForegroundBrush}"/>
+        <Setter Property="MinWidth" Value="260"/>
+        <Setter Property="MaxWidth" Value="360"/>
+
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        TextElement.Foreground="{TemplateBinding Foreground}"
+                        BoxShadow="0 6 24 0 #40000000">
+                    <StackPanel Spacing="10">
+
+                        <ContentPresenter Content="{TemplateBinding Title}"
+                                          IsVisible="{TemplateBinding Title, Converter={x:Static conv:ObjectConverters.IsNotNull}}"
+                                          TextElement.FontSize="16"
+                                          TextElement.FontWeight="SemiBold"/>
+
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          TextElement.FontSize="13"/>
+
+                        <StackPanel Spacing="12" Margin="0,4,0,0">
+                            <TextBlock Text="{TemplateBinding ProgressText}"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource CoachlightSecondaryForegroundBrush}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
+                                <Button Content="Skip"
+                                        Command="{TemplateBinding SkipCommand}"
+                                        Background="Transparent"
+                                        Foreground="{DynamicResource CoachlightSecondaryForegroundBrush}"
+                                        Padding="12,6"/>
+                                <Button Content="Back"
+                                        Command="{TemplateBinding PreviousCommand}"
+                                        IsVisible="{TemplateBinding IsFirst, Converter={x:Static conv:BoolConverters.Not}}"
+                                        Background="Transparent"
+                                        Padding="12,6"/>
+                                <Button Content="{TemplateBinding NextText}"
+                                        Command="{TemplateBinding NextCommand}"
+                                        Background="{DynamicResource CoachlightAccentBrush}"
+                                        Foreground="{DynamicResource CoachlightAccentForegroundBrush}"
+                                        Padding="16,6"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                    </StackPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+</ResourceDictionary>
