@@ -2,7 +2,9 @@ using Avalonia;
 using Avalonia.VisualTree;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Coachlight.Avalonia.Common;
 using Coachlight.Avalonia.Controller;
 using Coachlight.Avalonia.Enums;
@@ -21,6 +23,7 @@ internal sealed class CoachmarkOverlay : Canvas
 
     public CoachmarkOverlay(TourController controller)
     {
+        Focusable = true;
         _controller = controller ?? throw new ArgumentNullException(nameof(controller));
 
         _dim.Bind(SpotlightDim.FillProperty, this.GetResourceObservable("CoachlightDimBrush"));
@@ -40,6 +43,7 @@ internal sealed class CoachmarkOverlay : Canvas
         if (_layer is null) return;
 
         _layer.Children.Add(this);
+        Dispatcher.UIThread.Post(() => Focus(), DispatcherPriority.Input);
 
         Width = _layer.Bounds.Width;
         Height = _layer.Bounds.Height;
@@ -51,6 +55,33 @@ internal sealed class CoachmarkOverlay : Canvas
 
         _controller.CurrentStepChanged += OnCurrentStepChanged;
         _controller.Ended += OnEnded;
+    }
+    
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Source is Button && (e.Key is Key.Enter or Key.Space))
+            return;
+
+        switch (e.Key)
+        {
+            case Key.Escape:
+                _controller.Skip();
+                e.Handled = true;
+                break;
+            case Key.Enter:
+            case Key.Right:
+            case Key.Down:
+                _controller.Next();
+                e.Handled = true;
+                break;
+            case Key.Left:
+            case Key.Up:
+                _controller.Previous();
+                e.Handled = true;
+                break;
+        }
     }
 
     private void Detach()
@@ -84,7 +115,7 @@ internal sealed class CoachmarkOverlay : Canvas
         _card.IsLast = _controller.IsLast;
         _card.NextText = _controller.IsLast ? "Done" : "Next";
     }
-    
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -96,11 +127,11 @@ internal sealed class CoachmarkOverlay : Canvas
     {
         var width = Bounds.Width;
         var height = Bounds.Height;
-        if(width <= 0 || height <= 0) return;
+        if (width <= 0 || height <= 0) return;
 
         _dim.Width = width;
         _dim.Height = height;
-        
+
         var step = _controller.CurrentStep;
         if (step is null) return;
 
@@ -118,7 +149,7 @@ internal sealed class CoachmarkOverlay : Canvas
             CenterCard();
         }
     }
-    
+
     private Rect? GetTargetRect(Control? target)
     {
         if (target is null || !target.IsVisible || !target.IsEffectivelyVisible) return null;
@@ -127,8 +158,8 @@ internal sealed class CoachmarkOverlay : Canvas
         var b = target.Bounds;
         if (b.Width <= 0 || b.Height <= 0) return null;
 
-        if (target.TransformToVisual(this) is not { } m) return null;  
-        var rect = new Rect(b.Size).TransformToAABB(m);               
+        if (target.TransformToVisual(this) is not { } m) return null;
+        var rect = new Rect(b.Size).TransformToAABB(m);
         return rect is { Width: > 0, Height: > 0 } ? rect : null;
     }
 
@@ -137,20 +168,65 @@ internal sealed class CoachmarkOverlay : Canvas
         _card.Measure(new Size(Bounds.Width, Bounds.Height));
         var cs = _card.DesiredSize;
         const double gap = 12;
-        
-        double x = hole.Center.X - cs.Width / 2;
-        double y = hole.Bottom + gap;
-        
-        var maxX = Math.Max(8, Bounds.Width - cs.Width - 8);
-        var maxY = Math.Max(8, Bounds.Height - cs.Height - 8);
+        const double margin = 8;
+        double w = Bounds.Width, h = Bounds.Height;
 
-        x = Math.Clamp(x, 8, maxX);
-        y = Math.Clamp(y, 8, maxY);
-        
+        Side[] order = side switch
+        {
+            Side.Top => new[] { Side.Top, Side.Bottom, Side.Right, Side.Left },
+            Side.Left => new[] { Side.Left, Side.Right, Side.Bottom, Side.Top },
+            Side.Right => new[] { Side.Right, Side.Left, Side.Bottom, Side.Top },
+            _ => new[] { Side.Bottom, Side.Top, Side.Right, Side.Left }, // Bottom / Auto
+        };
+
+        foreach (var s in order)
+        {
+            double x, y;
+            bool fits;
+            switch (s)
+            {
+                case Side.Top:
+                    x = hole.Center.X - cs.Width / 2;
+                    y = hole.Y - gap - cs.Height;
+                    fits = y >= margin;
+                    break;
+                case Side.Right:
+                    x = hole.Right + gap;
+                    y = hole.Center.Y - cs.Height / 2;
+                    fits = x + cs.Width <= w - margin;
+                    break;
+                case Side.Left:
+                    x = hole.X - gap - cs.Width;
+                    y = hole.Center.Y - cs.Height / 2;
+                    fits = x >= margin;
+                    break;
+                default: // Bottom
+                    x = hole.Center.X - cs.Width / 2;
+                    y = hole.Bottom + gap;
+                    fits = y + cs.Height <= h - margin;
+                    break;
+            }
+
+            if (fits)
+            {
+                SetCard(Math.Clamp(x, margin, Math.Max(margin, w - cs.Width - margin)),
+                    Math.Clamp(y, margin, Math.Max(margin, h - cs.Height - margin)));
+                return;
+            }
+        }
+
+        double fx = hole.Center.X - cs.Width / 2;
+        double fy = hole.Bottom + gap;
+        SetCard(Math.Clamp(fx, margin, Math.Max(margin, w - cs.Width - margin)),
+            Math.Clamp(fy, margin, Math.Max(margin, h - cs.Height - margin)));
+    }
+
+    private void SetCard(double x, double y)
+    {
         Canvas.SetLeft(_card, x);
         Canvas.SetTop(_card, y);
     }
-    
+
     private void CenterCard()
     {
         _card.Measure(new Size(Bounds.Width, Bounds.Height));
@@ -163,8 +239,15 @@ internal sealed class CoachmarkOverlay : Canvas
     {
         private readonly Action<Rect> _onNext;
         public BoundsObserver(Action<Rect> onNext) => _onNext = onNext;
-        public void OnCompleted() { }
-        public void OnError(Exception error) { }
+
+        public void OnCompleted()
+        {
+        }
+
+        public void OnError(Exception error)
+        {
+        }
+
         public void OnNext(Rect value) => _onNext(value);
     }
 }

@@ -24,7 +24,7 @@ public partial class MainWindowViewModel : ObservableObject
                 .Title("Привет!")
                 .Text("Это короткий тур по интерфейсу. Нажимай «Next»."))
             .Coachmark("btnConnect", s => s
-                .Placement(Side.Bottom)
+                .Placement(Side.Right)
                 .Title("Подключение")
                 .Text("Эта кнопка соединяет с роботом."))
             .Coachmark("btnSettings", s => s
