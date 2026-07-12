@@ -25,7 +25,8 @@ public sealed class TourController
 
     public bool IsFirst => !HasShowableInRange(0, _index - 1);
     public bool IsLast => !HasShowableInRange(_index + 1, StepCount - 1);
-
+    public Control? CurrentTarget => CurrentStep is { } step ? ResolveTarget(step) : null;
+    
     public event EventHandler<TourStep?>? CurrentStepChanged;
     public event EventHandler? Ended;
 
