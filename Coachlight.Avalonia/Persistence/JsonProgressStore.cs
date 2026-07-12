@@ -25,8 +25,8 @@ public class JsonProgressStore : IProgressStore
     {
         lock (_lock)
         {
-            _completed.Add(tourId);
-            Save();
+            if (_completed.Add(tourId))
+                Save();
         }
     }
 
@@ -34,8 +34,8 @@ public class JsonProgressStore : IProgressStore
     {
         lock (_lock)
         {
-            _completed.Remove(tourId);
-            Save();
+            if (_completed.Remove(tourId))
+                Save();
         }
     }
 
@@ -74,7 +74,7 @@ public class JsonProgressStore : IProgressStore
         try
         {
             var directoryName = Path.GetDirectoryName(_filePath);
-            if (string.IsNullOrWhiteSpace(directoryName))
+            if (!string.IsNullOrWhiteSpace(directoryName))
             {
                 Directory.CreateDirectory(DefaultPath());
             }
