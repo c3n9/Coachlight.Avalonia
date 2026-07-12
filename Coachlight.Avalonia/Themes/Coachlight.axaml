@@ -5,6 +5,29 @@
         <ResourceInclude Source="avares://Coachlight.Avalonia/Themes/CoachmarkCard.axaml"/>
     </ResourceDictionary.MergedDictionaries>
 
-    <SolidColorBrush x:Key="CoachlightDimBrush" Color="#B3000000"/>
+    <ResourceDictionary.ThemeDictionaries>
 
+        <!-- Light theme -->
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="CoachlightDimBrush"                 Color="#B3000000"/>
+            <SolidColorBrush x:Key="CoachlightCardBackgroundBrush"      Color="#FFFFFFFF"/>
+            <SolidColorBrush x:Key="CoachlightCardBorderBrush"          Color="#22000000"/>
+            <SolidColorBrush x:Key="CoachlightForegroundBrush"          Color="#FF1A1A1A"/>
+            <SolidColorBrush x:Key="CoachlightSecondaryForegroundBrush" Color="#FF6B6B6B"/>
+            <SolidColorBrush x:Key="CoachlightAccentBrush"              Color="#FF3B82F6"/>
+            <SolidColorBrush x:Key="CoachlightAccentForegroundBrush"    Color="#FFFFFFFF"/>
+        </ResourceDictionary>
+
+        <!-- Dark theme-->
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="CoachlightDimBrush"                 Color="#CC000000"/>
+            <SolidColorBrush x:Key="CoachlightCardBackgroundBrush"      Color="#FF2A2A2E"/>
+            <SolidColorBrush x:Key="CoachlightCardBorderBrush"          Color="#33FFFFFF"/>
+            <SolidColorBrush x:Key="CoachlightForegroundBrush"          Color="#FFF0F0F0"/>
+            <SolidColorBrush x:Key="CoachlightSecondaryForegroundBrush" Color="#FFB0B0B0"/>
+            <SolidColorBrush x:Key="CoachlightAccentBrush"              Color="#FF3B82F6"/>
+            <SolidColorBrush x:Key="CoachlightAccentForegroundBrush"    Color="#FFFFFFFF"/>
+        </ResourceDictionary>
+
+    </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>
