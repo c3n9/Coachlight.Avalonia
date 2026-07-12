@@ -19,13 +19,19 @@ internal sealed class CoachmarkOverlay : Canvas
     private readonly CoachmarkCard _card = new CoachmarkCard();
     private OverlayLayer? _layer;
     private IDisposable? _layerBoundsSub;
-
+    private readonly DispatcherTimer _refreshTimer;
+    private DateTime _warmupUntil;
+    private Rect? _prevSpot;
+    private bool _hasPrevSpot;
 
     public CoachmarkOverlay(TourController controller)
     {
         Focusable = true;
         _controller = controller ?? throw new ArgumentNullException(nameof(controller));
 
+        _refreshTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(16) };
+        _refreshTimer.Tick += (_, _) => Recompute();
+        
         _dim.Bind(SpotlightDim.FillProperty, this.GetResourceObservable("CoachlightDimBrush"));
         Children.Add(_dim);
         Children.Add(_card);
@@ -51,6 +57,7 @@ internal sealed class CoachmarkOverlay : Canvas
         {
             Width = rect.Width;
             Height = rect.Height;
+            RequestRefresh();
         }));
 
         _controller.CurrentStepChanged += OnCurrentStepChanged;
@@ -86,6 +93,7 @@ internal sealed class CoachmarkOverlay : Canvas
 
     private void Detach()
     {
+        _refreshTimer.Stop();
         _controller.CurrentStepChanged -= OnCurrentStepChanged;
         _controller.Ended -= OnEnded;
         _layerBoundsSub?.Dispose();
@@ -103,7 +111,9 @@ internal sealed class CoachmarkOverlay : Canvas
     {
         if (step is null) return;
         SyncCard(step);
-        RefreshVisual();
+        _warmupUntil = DateTime.UtcNow + TimeSpan.FromMilliseconds(800); 
+        _hasPrevSpot = false;                                            
+        RequestRefresh();
     }
 
     private void SyncCard(TourStep step)
@@ -120,10 +130,16 @@ internal sealed class CoachmarkOverlay : Canvas
     {
         base.OnPropertyChanged(change);
         if (change.Property == BoundsProperty)
-            RefreshVisual();
+            RequestRefresh();
+    }
+    
+    private void RequestRefresh()
+    {
+        if (!_refreshTimer.IsEnabled)
+            _refreshTimer.Start();
     }
 
-    private void RefreshVisual()
+    private void Recompute()
     {
         var width = Bounds.Width;
         var height = Bounds.Height;
@@ -133,21 +149,52 @@ internal sealed class CoachmarkOverlay : Canvas
         _dim.Height = height;
 
         var step = _controller.CurrentStep;
-        if (step is null) return;
+        if (step is null) { _refreshTimer.Stop(); return; }
 
-        var rect = GetTargetRect(_controller.CurrentTarget);
-        if (rect is { } r)
+        Rect? spot = null;
+        if (!step.IsModal)
         {
-            var padding = step.SpotlightPadding;
-            _dim.Hole = new Rect(r.X - padding, r.Y - padding, r.Width + padding * 2, r.Height + padding * 2);
-            _dim.CornerRadius = step.SpotlightRadius;
-            PlaceCard(_dim.Hole.Value, step.Placement);
+            var rect = GetTargetRect(_controller.CurrentTarget);
+            if (rect is { } r)
+            {
+                var p = step.SpotlightPadding;
+                spot = new Rect(r.X - p, r.Y - p, r.Width + p * 2, r.Height + p * 2);
+            }
         }
-        else
+
+        if (spot is { } sr)
+        {
+            _dim.Hole = sr;
+            _dim.CornerRadius = step.SpotlightRadius;
+            PlaceCard(sr, step.Placement);
+        }
+        else if (step.IsModal)
         {
             _dim.Hole = null;
             CenterCard();
         }
+        else
+        {
+            _dim.Hole = null;
+            if (DateTime.UtcNow < _warmupUntil)
+                return;             
+            CenterCard();         
+        }
+        
+        var stable = _hasPrevSpot && SpotEquals(spot, _prevSpot);
+        _prevSpot = spot;
+        _hasPrevSpot = true;
+        if (stable && DateTime.UtcNow >= _warmupUntil)
+            _refreshTimer.Stop();
+    }
+    
+    private static bool SpotEquals(Rect? a, Rect? b)
+    {
+        if (a is null && b is null) return true;
+        if (a is { } ra && b is { } rb)
+            return Math.Abs(ra.X - rb.X) < 0.5 && Math.Abs(ra.Y - rb.Y) < 0.5
+                                               && Math.Abs(ra.Width - rb.Width) < 0.5 && Math.Abs(ra.Height - rb.Height) < 0.5;
+        return false;
     }
 
     private Rect? GetTargetRect(Control? target)
