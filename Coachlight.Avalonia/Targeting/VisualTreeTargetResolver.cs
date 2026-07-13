@@ -5,7 +5,8 @@ using Coachlight.Avalonia.Controller;
 
 namespace Coachlight.Avalonia.Targeting;
 
-public class VisualTreeTargetResolver : ITargetResolver
+/// <summary>Resolves targets by searching the visual tree for a control tagged with <see cref="Coachmark.IdProperty"/>.</summary>
+internal sealed class VisualTreeTargetResolver : ITargetResolver
 {
     private readonly Visual _root;
 

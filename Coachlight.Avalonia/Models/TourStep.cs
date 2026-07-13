@@ -1,31 +1,41 @@
 using Avalonia.Controls;
 using Coachlight.Avalonia.Enums;
 
-
 namespace Coachlight.Avalonia.Models;
 
 /// <summary>
-/// One step of the tour: what to highlight and what to show in the card.
+/// One step of a tour: what to highlight and what to show in the card. Immutable; built via
+/// <see cref="Building.StepBuilder"/> (through <see cref="Building.TourBuilder"/>).
 /// </summary>
 public sealed class TourStep
 {
-    // Two ways for target control
+    /// <summary>Id of the target control, resolved via <see cref="Controller.ITargetResolver"/>. Mutually exclusive with <see cref="TargetProvider"/> in practice; a provider takes priority if both are set.</summary>
     public string? TargetId { get; init; }
+
+    /// <summary>Resolves the target control directly, called when the step is shown. Takes priority over <see cref="TargetId"/> if both are set.</summary>
     public Func<Control?>? TargetProvider { get; init; }
-    
-    // Card content
-    public object? Title {get; init; }
-    public object? Content {get; init; }
-    
-    // Placement
+
+    /// <summary>The step title. Accepts a string or any object rendered via a <c>DataTemplate</c>.</summary>
+    public object? Title { get; init; }
+
+    /// <summary>The step body. Accepts a string or any object rendered via a <c>DataTemplate</c>.</summary>
+    public object? Content { get; init; }
+
+    /// <summary>Preferred side to place the card on relative to the target.</summary>
     public Side Placement { get; init; }
+
+    /// <summary>Padding (px) between the target's bounds and the edge of the spotlight hole.</summary>
     public double SpotlightPadding { get; init; } = 8;
+
+    /// <summary>Corner radius (px) of the spotlight hole.</summary>
     public double SpotlightRadius { get; init; } = 8;
-    
-    // Lifecycle hooks
+
+    /// <summary>Invoked when this step becomes active. Exceptions are swallowed so a broken demo cannot break tour navigation.</summary>
     public Action? OnEnter { get; init; }
+
+    /// <summary>Invoked when this step is left. Exceptions are swallowed so a broken demo cannot break tour navigation.</summary>
     public Action? OnExit { get; init; }
-    
-    // If there is no goal, we show it in the center.
+
+    /// <summary>Whether this step has no target (neither <see cref="TargetId"/> nor <see cref="TargetProvider"/> set) and is shown as a centered modal card.</summary>
     public bool IsModal => TargetId is null && TargetProvider is null;
 }

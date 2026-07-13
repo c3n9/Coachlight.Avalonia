@@ -110,18 +110,22 @@ public class CoachmarkCard : TemplatedControl
         set => SetValue(SkipCommandProperty, value);
     }
 
+    /// <summary>Defines the <see cref="BackText"/> property.</summary>
     public static readonly StyledProperty<string?> BackTextProperty =
         AvaloniaProperty.Register<CoachmarkCard, string?>(nameof(BackText));
 
+    /// <summary>Gets or sets the caption of the "back" button.</summary>
     public string? BackText
     {
         get => GetValue(BackTextProperty);
         set => SetValue(BackTextProperty, value);
     }
 
+    /// <summary>Defines the <see cref="SkipText"/> property.</summary>
     public static readonly StyledProperty<string?> SkipTextProperty =
         AvaloniaProperty.Register<CoachmarkCard, string?>(nameof(SkipText));
 
+    /// <summary>Gets or sets the caption of the "skip" button.</summary>
     public string? SkipText
     {
         get => GetValue(SkipTextProperty);
