@@ -16,7 +16,7 @@
         <Description>Interactive onboarding / product tours (spotlight coachmarks) for Avalonia. Zero dependencies, MVVM-friendly, fully re-themeable.</Description>
         <PackageTags>avalonia;onboarding;tour;coachmark;walkthrough;spotlight;tutorial</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageProjectUrl>https://github.com/c3n9/Coachlight.Avalonia</PackageProjectUrl>
+        <PackageProjectUrl>https://www.nuget.org/packages/Coachlight.Avalonia</PackageProjectUrl>
         <RepositoryUrl>https://github.com/c3n9/Coachlight.Avalonia</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
