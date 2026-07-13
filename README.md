@@ -1,10 +1,14 @@
-# Coachlight.Avalonia
+
+# Coachlight.Avalonia [![NuGet](https://img.shields.io/nuget/v/Coachlight.Avalonia.svg)](https://www.nuget.org/packages/Coachlight.Avalonia/)
 
 Interactive onboarding / product tours for [Avalonia](https://avaloniaui.net/) apps — spotlight
 coachmarks, modal steps, and step-by-step navigation. Zero runtime dependencies beyond Avalonia
 itself, MVVM-friendly, and fully re-themeable.
 
-https://github.com/user-attachments/assets/264ae1e3-30cd-45f3-9faf-117156bb496a
+<p align="center">
+    <img width="1012" height="540" alt="Frame 47983" src="https://github.com/user-attachments/assets/d7aa87ad-5f36-44b1-b569-a44c0cfb2ce4" alt="Coachlight.Avalonia banner" />
+</p>
+
 
 - **Spotlight coachmarks** — dims the screen and cuts a rounded hole around the target control.
   The target stays fully interactive (clicks pass through the hole) — you can even drive a live
@@ -20,6 +24,8 @@ https://github.com/user-attachments/assets/264ae1e3-30cd-45f3-9faf-117156bb496a
   color is a `DynamicResource` you can override, and the whole template can be replaced.
 - **Opt-in persistence** — show a tour once per user with a pluggable `IProgressStore`; the
   library never touches disk unless you explicitly ask it to.
+
+https://github.com/user-attachments/assets/264ae1e3-30cd-45f3-9faf-117156bb496a
 
 ## Install
 
