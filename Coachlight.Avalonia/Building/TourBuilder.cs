@@ -61,7 +61,8 @@ public sealed class TourBuilder
         return new Tour(_id, _steps)
         {
             OnCompleted =  _onCompleted,
-            OnSkipped =  _onSkipped
+            OnSkipped =  _onSkipped,
+            Labels = _labels
         };
     }
 
