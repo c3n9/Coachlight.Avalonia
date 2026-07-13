@@ -4,23 +4,58 @@
         xmlns:vm="clr-namespace:Coachlight.Gallery.ViewModels"
         x:Class="Coachlight.Gallery.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Width="720" Height="480"
+        MinWidth="760" MinHeight="640"
         Title="Coachlight Gallery">
 
     <StackPanel Spacing="14"
                 Margin="28"
+                Width="360"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top">
         <TextBlock Text="Coachlight demo" FontSize="22" FontWeight="SemiBold" />
+        <TextBlock Text="A tour that targets several different control types."
+                   Foreground="Gray" TextWrapping="Wrap" />
+
+        <TextBox x:Name="UserNameBox"
+                 cl:Coachmark.Id="userNameBox"
+                 Watermark="User name"
+                 Text="{Binding UserName}" />
+
+        <ComboBox x:Name="LanguageCombo"
+                  cl:Coachmark.Id="languageCombo"
+                  HorizontalAlignment="Stretch"
+                  ItemsSource="{Binding Languages}"
+                  SelectedItem="{Binding SelectedLanguage}" />
+
+        <CheckBox x:Name="RememberMeCheck"
+                  cl:Coachmark.Id="rememberMeCheck"
+                  Content="Remember me"
+                  IsChecked="{Binding RememberMe}" />
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Volume" />
+            <Slider x:Name="VolumeSlider"
+                    cl:Coachmark.Id="volumeSlider"
+                    Minimum="0" Maximum="100"
+                    Value="{Binding Volume}" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Recent items" />
+            <ListBox x:Name="RecentItemsList"
+                     cl:Coachmark.Id="recentItemsList"
+                     Height="110"
+                     ItemsSource="{Binding RecentItems}" />
+        </StackPanel>
 
         <Button x:Name="ConnectBtn"
                 cl:Coachmark.Id="btnConnect"
-                Content="Подключиться"
+                Content="Connect"
                 Width="200" />
 
         <Button x:Name="SettingsBtn"
                 cl:Coachmark.Id="btnSettings"
-                Content="Настройки"
+                Content="Settings"
                 Width="200" />
 
         <Button Content="▶ Start tour"
