@@ -4,6 +4,8 @@ Interactive onboarding / product tours for [Avalonia](https://avaloniaui.net/) a
 coachmarks, modal steps, and step-by-step navigation. Zero runtime dependencies beyond Avalonia
 itself, MVVM-friendly, and fully re-themeable.
 
+https://github.com/user-attachments/assets/264ae1e3-30cd-45f3-9faf-117156bb496a
+
 - **Spotlight coachmarks** — dims the screen and cuts a rounded hole around the target control.
   The target stays fully interactive (clicks pass through the hole) — you can even drive a live
   demo while the step is shown (see `OnEnter`/`OnExit`).
