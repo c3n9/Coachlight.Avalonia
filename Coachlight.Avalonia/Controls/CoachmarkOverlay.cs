@@ -105,7 +105,7 @@ internal sealed class CoachmarkOverlay : Canvas
         }
     }
 
-    private void OnEnded(object? sender, EventArgs e) => Detach();
+    private void OnEnded(object? sender, TourEndReason reason) => Detach();
 
     private void OnCurrentStepChanged(object? sender, TourStep? step)
     {

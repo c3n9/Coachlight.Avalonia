@@ -28,8 +28,7 @@ public sealed class TourController
     public Control? CurrentTarget => CurrentStep is { } step ? ResolveTarget(step) : null;
     
     public event EventHandler<TourStep?>? CurrentStepChanged;
-    public event EventHandler? Ended;
-
+    public event EventHandler<TourEndReason>? Ended;
     public void Start(Tour tour)
     {
         ArgumentNullException.ThrowIfNull(tour);
@@ -56,14 +55,14 @@ public sealed class TourController
         var t = _tour;
         EndInternal();
         t?.OnSkipped?.Invoke();
-        Ended?.Invoke(this, EventArgs.Empty);
+        Ended?.Invoke(this, TourEndReason.Skipped);
     }
 
     public void Stop()
     {
         if (!IsActive) return;
         EndInternal();
-        Ended?.Invoke(this, EventArgs.Empty);
+        Ended?.Invoke(this, TourEndReason.Stopped);
     }
 
     // Internal methods
@@ -115,7 +114,7 @@ public sealed class TourController
         var t = _tour;
         EndInternal();
         t?.OnCompleted?.Invoke();
-        Ended?.Invoke(this, EventArgs.Empty);
+        Ended?.Invoke(this, TourEndReason.Completed);
     }
 
     private void EndInternal()
