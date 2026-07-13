@@ -1,7 +1,8 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:Coachlight.Avalonia.Controls"
-                    xmlns:conv="using:Avalonia.Data.Converters">
+                    xmlns:conv="using:Avalonia.Data.Converters"
+                    xmlns:sys="using:System">
 
     <SolidColorBrush x:Key="CoachlightCardBackgroundBrush" Color="#FFFFFFFF"/>
     <SolidColorBrush x:Key="CoachlightCardBorderBrush" Color="#22000000"/>
@@ -9,6 +10,10 @@
     <SolidColorBrush x:Key="CoachlightSecondaryForegroundBrush" Color="#FF6B6B6B"/>
     <SolidColorBrush x:Key="CoachlightAccentBrush" Color="#FF3B82F6"/>
     <SolidColorBrush x:Key="CoachlightAccentForegroundBrush" Color="#FFFFFFFF"/>
+    
+    <DataTemplate x:Key="CoachlightWrappingStringTemplate" DataType="{x:Type sys:String}">
+        <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+    </DataTemplate>
 
     <ControlTheme x:Key="{x:Type controls:CoachmarkCard}" TargetType="controls:CoachmarkCard">
         <Setter Property="Background" Value="{DynamicResource CoachlightCardBackgroundBrush}"/>
@@ -38,12 +43,16 @@
                         BoxShadow="0 6 24 0 #40000000">
                     <StackPanel Spacing="10">
 
-                        <ContentPresenter Content="{TemplateBinding Title}"
+                        <ContentPresenter Name="PART_TitlePresenter"
+                                          Content="{TemplateBinding Title}"
+                                          ContentTemplate="{StaticResource CoachlightWrappingStringTemplate}"
                                           IsVisible="{TemplateBinding Title, Converter={x:Static conv:ObjectConverters.IsNotNull}}"
                                           TextElement.FontSize="16"
                                           TextElement.FontWeight="SemiBold"/>
 
-                        <ContentPresenter Content="{TemplateBinding Content}"
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{StaticResource CoachlightWrappingStringTemplate}"
                                           TextElement.FontSize="13"/>
 
                         <StackPanel Spacing="12" Margin="0,4,0,0">
