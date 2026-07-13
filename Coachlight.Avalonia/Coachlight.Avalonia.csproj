@@ -1,19 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <PackageId>Coachlight.Avalonia</PackageId>
-        <Version>0.1.0-preview.1</Version>
-        <Description>Interactive onboarding / product tours (spotlight coachmarks) for Avalonia.</Description>
+        <Version>0.1.0</Version>
+        <Authors>c3n9</Authors>
+        <Description>Interactive onboarding / product tours (spotlight coachmarks) for Avalonia. Zero dependencies, MVVM-friendly, fully re-themeable.</Description>
         <PackageTags>avalonia;onboarding;tour;coachmark;walkthrough;spotlight;tutorial</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/c3n9/Coachlight.Avalonia</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/c3n9/Coachlight.Avalonia</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.3.0" />
+        <PackageReference Include="Avalonia" Version="11.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" Visible="false" />
+        <None Include="Assets\icon.png" Pack="true" PackagePath="\" Visible="false" />
     </ItemGroup>
 
 </Project>
