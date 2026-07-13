@@ -25,6 +25,8 @@ itself, MVVM-friendly, and fully re-themeable.
 - **Opt-in persistence** — show a tour once per user with a pluggable `IProgressStore`; the
   library never touches disk unless you explicitly ask it to.
 
+<img width="1280" height="821" alt="photo_2026-07-13_12-43-24" src="https://github.com/user-attachments/assets/c74ec37c-6c05-4a1a-b8b0-f209b94c3c26" />
+
 https://github.com/user-attachments/assets/264ae1e3-30cd-45f3-9faf-117156bb496a
 
 ## Install
