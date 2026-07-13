@@ -9,6 +9,8 @@ public sealed class Tour
     public IReadOnlyList<TourStep> Steps { get; }
     public Action? OnCompleted { get; init; }
     public Action? OnSkipped { get; init; }
+    
+    public TourLabels Labels { get; init; } = TourLabels.Defaults;
 
     public Tour(string id, IReadOnlyList<TourStep> steps)
     {

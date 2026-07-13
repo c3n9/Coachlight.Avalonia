@@ -109,4 +109,22 @@ public class CoachmarkCard : TemplatedControl
         get => GetValue(SkipCommandProperty);
         set => SetValue(SkipCommandProperty, value);
     }
+
+    public static readonly StyledProperty<string?> BackTextProperty =
+        AvaloniaProperty.Register<CoachmarkCard, string?>(nameof(BackText));
+
+    public string? BackText
+    {
+        get => GetValue(BackTextProperty);
+        set => SetValue(BackTextProperty, value);
+    }
+
+    public static readonly StyledProperty<string?> SkipTextProperty =
+        AvaloniaProperty.Register<CoachmarkCard, string?>(nameof(SkipText));
+
+    public string? SkipText
+    {
+        get => GetValue(SkipTextProperty);
+        set => SetValue(SkipTextProperty, value);
+    }
 }

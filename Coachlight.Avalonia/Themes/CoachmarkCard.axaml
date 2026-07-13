@@ -44,12 +44,12 @@
                                        FontSize="12"
                                        Foreground="{DynamicResource CoachlightSecondaryForegroundBrush}"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
-                                <Button Content="Skip"
+                                <Button Content="{TemplateBinding SkipText}"
                                         Command="{TemplateBinding SkipCommand}"
                                         Background="Transparent"
                                         Foreground="{DynamicResource CoachlightSecondaryForegroundBrush}"
                                         Padding="12,6"/>
-                                <Button Content="Back"
+                                <Button Content="{TemplateBinding BackText}"
                                         Command="{TemplateBinding PreviousCommand}"
                                         IsVisible="{TemplateBinding IsFirst, Converter={x:Static conv:BoolConverters.Not}}"
                                         Background="Transparent"

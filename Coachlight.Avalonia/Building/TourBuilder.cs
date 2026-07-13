@@ -9,10 +9,17 @@ public sealed class TourBuilder
     private readonly List<TourStep> _steps = new List<TourStep>();
     private Action? _onCompleted;
     private Action? _onSkipped;
+    private TourLabels _labels = TourLabels.Defaults;
 
     private TourBuilder(string id)
     {
         _id = id;
+    }
+
+    public TourBuilder Labels(TourLabels labels)
+    {
+        _labels = labels ?? TourLabels.Defaults;
+        return this;
     }
 
     public static TourBuilder Create(string id)

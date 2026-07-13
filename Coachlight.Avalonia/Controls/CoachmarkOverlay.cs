@@ -123,7 +123,13 @@ internal sealed class CoachmarkOverlay : Canvas
         _card.ProgressText = $"{_controller.CurrentIndex + 1} / {_controller.StepCount}";
         _card.IsFirst = _controller.IsFirst;
         _card.IsLast = _controller.IsLast;
-        _card.NextText = _controller.IsLast ? "Done" : "Next";
+        
+        var labels = _controller.CurrentTour?.Labels ?? TourLabels.Defaults;
+
+        _card.BackText = labels.Back;
+        _card.SkipText = labels.Skip;
+        _card.NextText = _controller.IsLast ? 
+            labels.Done : labels.Next;
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
