@@ -31,7 +31,11 @@ internal sealed class CoachmarkOverlay : Canvas
 
         _refreshTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(16) };
         _refreshTimer.Tick += (_, _) => Recompute();
-        
+
+        // Hidden until the first position is computed, so the card fades in instead of
+        // flashing at its default (0,0) spot for one frame.
+        _card.Opacity = 0;
+
         _dim.Bind(SpotlightDim.FillProperty, this.GetResourceObservable("CoachlightDimBrush"));
         Children.Add(_dim);
         Children.Add(_card);
@@ -111,8 +115,11 @@ internal sealed class CoachmarkOverlay : Canvas
     {
         if (step is null) return;
         SyncCard(step);
-        _warmupUntil = DateTime.UtcNow + TimeSpan.FromMilliseconds(800); 
-        _hasPrevSpot = false;                                            
+        _warmupUntil = DateTime.UtcNow + TimeSpan.FromMilliseconds(800);
+        _hasPrevSpot = false;
+
+        // Fade out the old content; Recompute fades it back in once the new position is ready.
+        _card.Opacity = 0;
         RequestRefresh();
     }
 
@@ -276,16 +283,31 @@ internal sealed class CoachmarkOverlay : Canvas
 
     private void SetCard(double x, double y)
     {
-        Canvas.SetLeft(_card, x);
-        Canvas.SetTop(_card, y);
+        var curX = Canvas.GetLeft(_card);
+        var curY = Canvas.GetTop(_card);
+
+        if (double.IsNaN(curX) || double.IsNaN(curY))
+        {
+            var transitions = _card.Transitions;
+            _card.Transitions = null;
+            Canvas.SetLeft(_card, x);
+            Canvas.SetTop(_card, y);
+            _card.Transitions = transitions;
+        }
+        else
+        {
+            Canvas.SetLeft(_card, x);
+            Canvas.SetTop(_card, y);
+        }
+
+        _card.Opacity = 1;
     }
 
     private void CenterCard()
     {
         _card.Measure(new Size(Bounds.Width, Bounds.Height));
         var cs = _card.DesiredSize;
-        Canvas.SetLeft(_card, (Bounds.Width - cs.Width) / 2);
-        Canvas.SetTop(_card, (Bounds.Height - cs.Height) / 2);
+        SetCard((Bounds.Width - cs.Width) / 2, (Bounds.Height - cs.Height) / 2);
     }
 
     private sealed class BoundsObserver : IObserver<Rect>

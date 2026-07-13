@@ -19,6 +19,13 @@
         <Setter Property="Foreground" Value="{DynamicResource CoachlightForegroundBrush}"/>
         <Setter Property="MinWidth" Value="260"/>
         <Setter Property="MaxWidth" Value="360"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Canvas.Left" Duration="0:0:0.22" Easing="CubicEaseOut"/>
+                <DoubleTransition Property="Canvas.Top" Duration="0:0:0.22" Easing="CubicEaseOut"/>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.18"/>
+            </Transitions>
+        </Setter>
 
         <Setter Property="Template">
             <ControlTemplate>
