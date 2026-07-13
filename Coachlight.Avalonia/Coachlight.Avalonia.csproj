@@ -11,6 +11,7 @@
     <PropertyGroup>
         <PackageId>Coachlight.Avalonia</PackageId>
         <Version>0.1.0</Version>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <Authors>c3n9</Authors>
         <Description>Interactive onboarding / product tours (spotlight coachmarks) for Avalonia. Zero dependencies, MVVM-friendly, fully re-themeable.</Description>
         <PackageTags>avalonia;onboarding;tour;coachmark;walkthrough;spotlight;tutorial</PackageTags>
