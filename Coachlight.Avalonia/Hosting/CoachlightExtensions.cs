@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.VisualTree;
 using Coachlight.Avalonia.Controller;
 using Coachlight.Avalonia.Controls;
@@ -48,7 +49,7 @@ public static class CoachlightExtensions
 
     private static void Run(Visual anchor, Tour tour, IProgressStore? store)
     {
-        var root = anchor.GetVisualRoot() as Visual ?? anchor;
+        var root = TopLevel.GetTopLevel(anchor) as Visual ?? anchor;
         var resolver = new VisualTreeTargetResolver(root);
         var controller = new TourController(resolver);
 

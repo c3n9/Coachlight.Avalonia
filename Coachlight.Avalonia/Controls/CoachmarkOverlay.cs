@@ -213,7 +213,7 @@ internal sealed class CoachmarkOverlay : Canvas
     private Rect? GetTargetRect(Control? target)
     {
         if (target is null || !target.IsVisible || !target.IsEffectivelyVisible) return null;
-        if (!target.IsArrangeValid || target.GetVisualRoot() is null) return null;
+        if (!target.IsArrangeValid || TopLevel.GetTopLevel(target) is null) return null;
 
         var b = target.Bounds;
         if (b.Width <= 0 || b.Height <= 0) return null;
