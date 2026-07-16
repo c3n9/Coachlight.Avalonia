@@ -78,17 +78,17 @@ public partial class MainWindowViewModel : ObservableObject
                 .OnEnter(() => StartListDemo(anchor))
                 .OnExit(() => StopListDemo(anchor)))
             .Coachmark("btnConnect", s => s
-                .Placement(Side.Right)
+                .Placement(Side.Left)
                 .Title("Connect")
-                .Text("This button connects to the robot."))
+                .Text("This button connects to the robot — up in the top-right corner."))
             .Coachmark("btnSettings", s => s
-                .Placement(Side.Bottom)
+                .Placement(Side.Left)
                 .Title("Settings")
-                .Text("And here are the application settings."))
+                .Text("And the application settings — down in the bottom-right corner."))
             .Coachmark(new[] { "btnConnect", "btnSettings" }, s => s
-                .Placement(Side.Right)
+                .Placement(Side.Left)
                 .Title("Both buttons")
-                .Text("One coachmark can spotlight several controls at once — each gets its own hole, and the card sits beside the whole group."))
+                .Text("One coachmark can spotlight several controls at once, even in different corners — each gets its own hole, and the card sits beside the whole group."))
             .Build();
 
         anchor.StartTour(tour);
