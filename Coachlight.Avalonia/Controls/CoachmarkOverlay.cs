@@ -164,36 +164,34 @@ internal sealed class CoachmarkOverlay : Canvas
         var step = _controller.CurrentStep;
         if (step is null) { _refreshTimer.Stop(); return; }
 
-        Rect? spot = null;
-        if (!step.IsModal)
-        {
-            var rect = GetTargetRect(_controller.CurrentTarget);
-            if (rect is { } r)
-            {
-                var p = step.SpotlightPadding;
-                spot = new Rect(r.X - p, r.Y - p, r.Width + p * 2, r.Height + p * 2);
-            }
-        }
+        var holes = step.IsModal ? null : BuildHoles(step);
 
-        if (spot is { } sr)
+        // The card anchors to a single rect: the chosen target (AnchorIndex) or the union of
+        // all holes. That anchor also drives spot-stability (below), which is enough to stop
+        // the refresh timer once positions settle.
+        Rect? spot = null;
+        if (holes is { Count: > 0 })
         {
-            _dim.Hole = sr;
+            _dim.Holes = holes;
             _dim.CornerRadius = step.SpotlightRadius;
-            PlaceCard(sr, step.Placement);
+            spot = step.AnchorIndex >= 0 && step.AnchorIndex < holes.Count
+                ? holes[step.AnchorIndex]
+                : Union(holes);
+            PlaceCard(spot.Value, step.Placement);
         }
         else if (step.IsModal)
         {
-            _dim.Hole = null;
+            _dim.Holes = null;
             CenterCard();
         }
         else
         {
-            _dim.Hole = null;
+            _dim.Holes = null;
             if (DateTime.UtcNow < _warmupUntil)
-                return;             
-            CenterCard();         
+                return;
+            CenterCard();
         }
-        
+
         var stable = _hasPrevSpot && SpotEquals(spot, _prevSpot);
         _prevSpot = spot;
         _hasPrevSpot = true;
@@ -208,6 +206,31 @@ internal sealed class CoachmarkOverlay : Canvas
             return Math.Abs(ra.X - rb.X) < 0.5 && Math.Abs(ra.Y - rb.Y) < 0.5
                                                && Math.Abs(ra.Width - rb.Width) < 0.5 && Math.Abs(ra.Height - rb.Height) < 0.5;
         return false;
+    }
+
+    private List<Rect>? BuildHoles(Models.TourStep step)
+    {
+        List<Rect>? holes = null;
+        var p = step.SpotlightPadding;
+        foreach (var target in _controller.CurrentTargets)
+        {
+            if (GetTargetRect(target) is not { } r) continue;
+            (holes ??= new List<Rect>()).Add(new Rect(r.X - p, r.Y - p, r.Width + p * 2, r.Height + p * 2));
+        }
+        return holes;
+    }
+
+    private static Rect Union(IReadOnlyList<Rect> rects)
+    {
+        double x1 = rects[0].X, y1 = rects[0].Y, x2 = rects[0].Right, y2 = rects[0].Bottom;
+        for (var i = 1; i < rects.Count; i++)
+        {
+            x1 = Math.Min(x1, rects[i].X);
+            y1 = Math.Min(y1, rects[i].Y);
+            x2 = Math.Max(x2, rects[i].Right);
+            y2 = Math.Max(y2, rects[i].Bottom);
+        }
+        return new Rect(x1, y1, x2 - x1, y2 - y1);
     }
 
     private Rect? GetTargetRect(Control? target)

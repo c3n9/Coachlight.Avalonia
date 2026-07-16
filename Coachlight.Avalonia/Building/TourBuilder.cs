@@ -33,7 +33,7 @@ public sealed class TourBuilder
     /// <summary>Adds a modal step: a centered card with no spotlighted target.</summary>
     public TourBuilder Modal(Action<StepBuilder> configure)
     {
-        return AddStep(new StepBuilder(null, null), configure);
+        return AddStep(new StepBuilder((string?)null, null), configure);
     }
 
     /// <summary>Adds a coachmark step targeting the control tagged with <c>Coachmark.Id="targetId"</c> in the visual tree.</summary>
@@ -48,6 +48,22 @@ public sealed class TourBuilder
     {
         ArgumentNullException.ThrowIfNull(target);
         return AddStep(new StepBuilder(null, target), configure);
+    }
+
+    /// <summary>Adds a coachmark step spotlighting several controls at once, each tagged with a matching <c>Coachmark.Id</c> in the visual tree (one hole per control).</summary>
+    public TourBuilder Coachmark(IReadOnlyList<string> targetIds, Action<StepBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(targetIds);
+        if (targetIds.Count == 0)
+            throw new ArgumentException("At least one target id is required.", nameof(targetIds));
+        return AddStep(new StepBuilder(targetIds, null), configure);
+    }
+
+    /// <summary>Adds a coachmark step spotlighting whatever controls <paramref name="targets"/> returns when the step is shown (one hole per control; nulls ignored).</summary>
+    public TourBuilder Coachmark(Func<IEnumerable<Control?>> targets, Action<StepBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(targets);
+        return AddStep(new StepBuilder(null, targets), configure);
     }
 
     /// <summary>Escape hatch: adds a fully pre-built <see cref="TourStep"/> as-is.</summary>

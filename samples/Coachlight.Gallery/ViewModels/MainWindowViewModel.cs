@@ -85,6 +85,10 @@ public partial class MainWindowViewModel : ObservableObject
                 .Placement(Side.Bottom)
                 .Title("Settings")
                 .Text("And here are the application settings."))
+            .Coachmark(new[] { "btnConnect", "btnSettings" }, s => s
+                .Placement(Side.Right)
+                .Title("Both buttons")
+                .Text("One coachmark can spotlight several controls at once — each gets its own hole, and the card sits beside the whole group."))
             .Build();
 
         anchor.StartTour(tour);

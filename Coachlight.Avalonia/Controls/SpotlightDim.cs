@@ -9,24 +9,24 @@ internal sealed class SpotlightDim : Control, ICustomHitTest
 {
     private readonly SpotlightGeometryCache _cache = new();
 
-    public static readonly StyledProperty<Rect?> HoleProperty =
-        AvaloniaProperty.Register<SpotlightDim, Rect?>(nameof(Hole));
+    public static readonly StyledProperty<IReadOnlyList<Rect>?> HolesProperty =
+        AvaloniaProperty.Register<SpotlightDim, IReadOnlyList<Rect>?>(nameof(Holes));
 
     public static readonly StyledProperty<double> CornerRadiusProperty =
         AvaloniaProperty.Register<SpotlightDim, double>(nameof(CornerRadius), 8d);
 
     public static readonly StyledProperty<IBrush?> FillProperty =
         AvaloniaProperty.Register<SpotlightDim, IBrush?>(nameof(Fill));
-    
+
     static SpotlightDim()
     {
-        AffectsRender<SpotlightDim>(HoleProperty, CornerRadiusProperty, FillProperty, BoundsProperty);
+        AffectsRender<SpotlightDim>(HolesProperty, CornerRadiusProperty, FillProperty, BoundsProperty);
     }
 
-    public Rect? Hole
+    public IReadOnlyList<Rect>? Holes
     {
-        get => GetValue(HoleProperty);
-        set => SetValue(HoleProperty, value);
+        get => GetValue(HolesProperty);
+        set => SetValue(HolesProperty, value);
     }
 
     public double CornerRadius
@@ -46,7 +46,7 @@ internal sealed class SpotlightDim : Control, ICustomHitTest
         var bounds = Bounds;
         if(bounds.Width <= 0 || bounds.Height <= 0)
             return;
-        var geometry = _cache.Get(bounds.Width, bounds.Height, Hole, CornerRadius);
+        var geometry = _cache.Get(bounds.Width, bounds.Height, Holes, CornerRadius);
         context.DrawGeometry(Fill, null, geometry);
     }
 
@@ -55,7 +55,7 @@ internal sealed class SpotlightDim : Control, ICustomHitTest
         var bounds = Bounds;
         if(bounds.Width <= 0 || bounds.Height <= 0)
             return false;
-        var geometry = _cache.Get(bounds.Width, bounds.Height, Hole, CornerRadius);
+        var geometry = _cache.Get(bounds.Width, bounds.Height, Holes, CornerRadius);
         return geometry.FillContains(point);
     }
 }

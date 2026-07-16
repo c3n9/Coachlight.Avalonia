@@ -44,7 +44,11 @@ public sealed class TourController
     public bool IsLast => !HasShowableInRange(_index + 1, StepCount - 1);
 
     /// <summary>The resolved target control of <see cref="CurrentStep"/>, or <c>null</c> for a modal step or an unresolved target.</summary>
-    public Control? CurrentTarget => CurrentStep is { } step ? ResolveTarget(step) : null;
+    public Control? CurrentTarget => CurrentTargets.Count > 0 ? CurrentTargets[0] : null;
+
+    /// <summary>All resolved target controls of <see cref="CurrentStep"/> (one spotlight hole each). Empty for a modal step or when nothing resolves.</summary>
+    public IReadOnlyList<Control> CurrentTargets =>
+        CurrentStep is { } step ? ResolveTargets(step) : Array.Empty<Control>();
 
     /// <summary>Raised whenever the current step changes (including to <c>null</c> when the tour ends).</summary>
     public event EventHandler<TourStep?>? CurrentStepChanged;
@@ -149,16 +153,29 @@ public sealed class TourController
 
     private bool ShouldShow(TourStep step)
     {
-        var target = ResolveTarget(step);
-        if (target is null) return true;
-        return target.IsVisible && target.IsEffectivelyVisible;
+        if (step.IsModal) return true;
+        var targets = ResolveTargets(step);
+        if (targets.Count == 0) return true;                    
+        return targets.Any(t => t.IsVisible && t.IsEffectivelyVisible);
     }
 
-    private Control? ResolveTarget(TourStep step)
+    private IReadOnlyList<Control> ResolveTargets(TourStep step)
     {
-        if (step.TargetProvider is not null) return step.TargetProvider();
-        if (step.TargetId is not null) return _resolver?.ResolveById(step.TargetId);
-        return null;
+        if (step.TargetsProvider is not null)
+            return step.TargetsProvider().Where(c => c is not null).Select(c => c!).ToList();
+
+        if (step.TargetIds is { Count: > 0 })
+            return step.TargetIds
+                .Select(id => _resolver?.ResolveById(id))
+                .Where(c => c is not null).Select(c => c!).ToList();
+
+        if (step.TargetProvider is not null)
+            return step.TargetProvider() is { } c ? new[] { c } : Array.Empty<Control>();
+
+        if (step.TargetId is not null)
+            return _resolver?.ResolveById(step.TargetId) is { } c ? new[] { c } : Array.Empty<Control>();
+
+        return Array.Empty<Control>();
     }
 
     private bool HasShowableInRange(int from, int to)

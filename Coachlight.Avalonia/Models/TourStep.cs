@@ -15,6 +15,15 @@ public sealed class TourStep
     /// <summary>Resolves the target control directly, called when the step is shown. Takes priority over <see cref="TargetId"/> if both are set.</summary>
     public Func<Control?>? TargetProvider { get; init; }
 
+    /// <summary>Ids of several controls to spotlight at once (each gets its own hole). Resolved via <see cref="Controller.ITargetResolver"/>.</summary>
+    public IReadOnlyList<string>? TargetIds { get; init; }
+
+    /// <summary>Resolves several target controls directly, called when the step is shown. Nulls are ignored.</summary>
+    public Func<IEnumerable<Control?>>? TargetsProvider { get; init; }
+
+    /// <summary>Index of the resolved target the card anchors to. <c>-1</c> (default) anchors the card to the union of all holes.</summary>
+    public int AnchorIndex { get; init; } = -1;
+
     /// <summary>The step title. Accepts a string or any object rendered via a <c>DataTemplate</c>.</summary>
     public object? Title { get; init; }
 
@@ -37,5 +46,7 @@ public sealed class TourStep
     public Action? OnExit { get; init; }
 
     /// <summary>Whether this step has no target (neither <see cref="TargetId"/> nor <see cref="TargetProvider"/> set) and is shown as a centered modal card.</summary>
-    public bool IsModal => TargetId is null && TargetProvider is null;
+    public bool IsModal =>
+        TargetId is null && TargetProvider is null &&
+        (TargetIds is null || TargetIds.Count == 0) && TargetsProvider is null;
 }
