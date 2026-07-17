@@ -56,15 +56,26 @@ public sealed class TourController
     /// <summary>Raised once when the tour ends, with the reason it ended.</summary>
     public event EventHandler<TourEndReason>? Ended;
 
-    /// <summary>Starts <paramref name="tour"/>, stopping any tour already in progress.</summary>
-    public void Start(Tour tour)
+    /// <summary>
+    /// Starts <paramref name="tour"/>, stopping any tour already in progress. Pass
+    /// <paramref name="startIndex"/> to begin at a later step — for example to resume a tour
+    /// that was interrupted — which keeps the step numbering of the whole tour intact. The
+    /// first showable step at or after <paramref name="startIndex"/> is shown; if there is
+    /// none — including when <paramref name="startIndex"/> is <see cref="Tour.Steps"/>.Count,
+    /// meaning "nothing left to show" — the tour completes immediately.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex"/> is negative, or past the end of <paramref name="tour"/>.</exception>
+    public void Start(Tour tour, int startIndex = 0)
     {
         ArgumentNullException.ThrowIfNull(tour);
+        ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(startIndex, tour.Steps.Count);
+
         if (IsActive) Stop();
         _tour = tour;
         _index = -1;
         _activeStep = null;
-        ShowStepFrom(0, +1);
+        ShowStepFrom(startIndex, +1);
     }
 
     /// <summary>Advances to the next showable step, or completes the tour if none remain.</summary>
