@@ -15,8 +15,12 @@ itself, MVVM-friendly, and fully re-themeable.
   demo while the step is shown (see `OnEnter`/`OnExit`).
 - **Any control can be a target** — buttons, text boxes, combo boxes, checkboxes, sliders, whole
   list boxes — targeting works off the control's actual on-screen bounds, not just buttons.
+- **Several targets per step** — one coachmark can spotlight a group of controls at once, each
+  with its own hole, however far apart they sit on screen.
 - **Auto-flip placement** — the card tries your preferred side first and falls back to whichever
   side actually fits the window.
+- **Stoppable and resumable** — `StartTour` hands back the `TourController` driving the tour, so
+  you can end it early and later pick it up at the step it stopped on, numbering intact.
 - **Zero dependencies** — no MVVM Toolkit, no ReactiveUI required to use the library itself.
 - **MVVM-friendly** — `StartTour` takes a `Visual` anchor (e.g. via `CommandParameter`), so a
   view model never needs a direct reference to a view.
@@ -78,8 +82,10 @@ anchor.StartTour(tour); // anchor: any Visual already attached to the window
 ```
 
 That's it — a dimmed overlay with a spotlighted hole and a navigation card appears over the
-window. See `samples/Coachlight.Gallery` for a full MVVM example covering `TextBox`, `ComboBox`,
-`CheckBox`, `Slider`, `ListBox`, custom button captions, and a live auto-scroll demo.
+window. See `samples/Coachlight.Gallery` for a full MVVM example: a multi-page app where every
+page owns its own tour, the tours hand off to each other and resume afterwards, covering
+`TextBox`, `ComboBox`, `CheckBox`, `Slider`, `ListBox`, custom button captions, and a live
+auto-scroll demo.
 
 ## Targeting
 
@@ -94,6 +100,43 @@ Two ways to point a step at a control:
 ```
 
 A step with no target (`.Modal(...)`) is shown as a centered card with no spotlight.
+
+### Several controls in one step
+
+Pass ids (or controls) instead of one, and the step cuts a hole around each. The card is placed
+beside the group as a whole, so it works even when the targets sit in opposite corners:
+
+```csharp
+.Coachmark(new[] { "btnConnect", "btnSettings" }, s => s
+    .Placement(Side.Left)
+    .Title("Both buttons")
+    .Text("Each gets its own hole; the card sits beside the group."))
+
+// Lazily resolved, same behavior — nulls are ignored
+.Coachmark(() => new[] { ctrlA, ctrlB }, s => s.Title(...))
+```
+
+Add `.Anchor(index)` to place the card next to one specific target instead of the whole group.
+
+## Resuming a tour, and handing off between tours
+
+`StartTour` returns the `TourController` driving the tour: use it to watch the tour or to end it
+programmatically. Combined with `startIndex`, that is enough to interrupt a tour and continue it
+later — the card keeps counting against the whole tour ("6 / 7"), not against the leftover steps.
+
+```csharp
+var controller = anchor.StartTour(tour);
+
+controller.Ended += (_, reason) => { /* Completed, Skipped or Stopped */ };
+controller.Stop();                       // ends it; reports Stopped, no OnSkipped callback
+
+anchor.StartTour(tour, startIndex: 5);   // later: continue from step 5, card reads "6 / 7"
+```
+
+This is what the gallery sample builds on: each page has its own view model and its own tour, a
+step asks the user to press a real button (clicks pass through the spotlight), and that press
+stops the current tour and starts the next page's one. When the second tour completes, the first
+resumes one step past where it handed off.
 
 ## Localizing button captions
 
@@ -134,6 +177,9 @@ static readonly IProgressStore Store = new JsonProgressStore();
 anchor.StartTour(tour, Store);              // shown once; no-op afterwards
 anchor.StartTour(tour, Store, force: true);  // always shown (e.g. a "?" help button)
 ```
+
+This overload returns `null` when the store reports the tour as already completed and nothing is
+shown; otherwise it returns the `TourController`, same as above.
 
 Implement `IProgressStore` yourself to persist elsewhere (a database, cloud settings, etc.).
 

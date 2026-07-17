@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cl="clr-namespace:Coachlight.Avalonia.Targeting;assembly=Coachlight.Avalonia"
+             xmlns:vm="clr-namespace:Coachlight.Gallery.ViewModels"
+             x:Class="Coachlight.Gallery.Views.ActionsView"
+             x:DataType="vm:ActionsPageViewModel">
+
+    <Grid Margin="28">
+        <StackPanel Spacing="14" Width="360"
+                    HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextBlock Text="Actions" FontSize="22" FontWeight="SemiBold" />
+            <TextBlock Text="The third view model and the third tour. It returns to the Media tour when finished."
+                       Foreground="Gray" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Status, StringFormat='Status: {0}'}" Foreground="Gray" />
+        </StackPanel>
+
+        <!-- Placed in opposite corners on purpose: the multi-target step spotlights both at once,
+             so the two holes end up far apart and the effect is obvious. -->
+        <Button x:Name="ConnectBtn"
+                cl:Coachmark.Id="btnConnect"
+                Content="Connect"
+                Width="200"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Command="{Binding ConnectCommand}" />
+
+        <Button x:Name="SettingsBtn"
+                cl:Coachmark.Id="btnSettings"
+                Content="Settings"
+                Width="200"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom" />
+    </Grid>
+</UserControl>

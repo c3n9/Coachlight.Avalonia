@@ -1,76 +1,37 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:cl="clr-namespace:Coachlight.Avalonia.Targeting;assembly=Coachlight.Avalonia"
+        xmlns:views="clr-namespace:Coachlight.Gallery.Views"
         xmlns:vm="clr-namespace:Coachlight.Gallery.ViewModels"
         x:Class="Coachlight.Gallery.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        MinWidth="760" MinHeight="640"
+        MinWidth="860" MinHeight="640"
         Title="Coachlight Gallery">
 
-    <Grid>
-    <StackPanel Spacing="14"
-                Margin="28"
-                Width="360"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top">
-        <TextBlock Text="Coachlight demo" FontSize="22" FontWeight="SemiBold" />
-        <TextBlock Text="A tour that targets several different control types."
-                   Foreground="Gray" TextWrapping="Wrap" />
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" BorderBrush="#22808080">
+            <StackPanel Orientation="Horizontal" Spacing="16" Margin="28,14">
+                <Button x:Name="StartTourBtn"
+                        Content="▶ Start tour"
+                        Command="{Binding StartTourCommand}"
+                        CommandParameter="{Binding $parent[Window]}" />
+                <TextBlock VerticalAlignment="Center"
+                           Foreground="Gray"
+                           Text="Each page runs its own tour; they hand off to each other and come back." />
+            </StackPanel>
+        </Border>
 
-        <TextBox x:Name="UserNameBox"
-                 cl:Coachmark.Id="userNameBox"
-                 Watermark="User name"
-                 Text="{Binding UserName}" />
-
-        <ComboBox x:Name="LanguageCombo"
-                  cl:Coachmark.Id="languageCombo"
-                  HorizontalAlignment="Stretch"
-                  ItemsSource="{Binding Languages}"
-                  SelectedItem="{Binding SelectedLanguage}" />
-
-        <CheckBox x:Name="RememberMeCheck"
-                  cl:Coachmark.Id="rememberMeCheck"
-                  Content="Remember me"
-                  IsChecked="{Binding RememberMe}" />
-
-        <StackPanel Spacing="4">
-            <TextBlock Text="Volume" />
-            <Slider x:Name="VolumeSlider"
-                    cl:Coachmark.Id="volumeSlider"
-                    Minimum="0" Maximum="100"
-                    Value="{Binding Volume}" />
-        </StackPanel>
-
-        <StackPanel Spacing="4">
-            <TextBlock Text="Recent items" />
-            <ListBox x:Name="RecentItemsList"
-                     cl:Coachmark.Id="recentItemsList"
-                     Height="110"
-                     ItemsSource="{Binding RecentItems}" />
-        </StackPanel>
-
-        <Button Content="▶ Start tour"
-                Margin="0,10,0,0"
-                Command="{Binding StartTourCommand}"
-                CommandParameter="{Binding $parent[Window]}" />
-    </StackPanel>
-
-    <!-- Placed in opposite corners on purpose: the multi-target step spotlights both at once,
-         so the two holes end up far apart and the effect is obvious. -->
-    <Button x:Name="ConnectBtn"
-            cl:Coachmark.Id="btnConnect"
-            Content="Connect"
-            Width="200"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Top"
-            Margin="28" />
-
-    <Button x:Name="SettingsBtn"
-            cl:Coachmark.Id="btnSettings"
-            Content="Settings"
-            Width="200"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Margin="28" />
-    </Grid>
+        <!-- Only the selected tab's content lives in the visual tree, so each tour only ever
+             resolves targets on its own page. -->
+        <TabControl SelectedIndex="{Binding SelectedPageIndex}" TabStripPlacement="Left">
+            <TabItem Header="Profile">
+                <views:ProfileView DataContext="{Binding Profile}" />
+            </TabItem>
+            <TabItem Header="Media">
+                <views:MediaView DataContext="{Binding Media}" />
+            </TabItem>
+            <TabItem Header="Actions">
+                <views:ActionsView DataContext="{Binding Actions}" />
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 </Window>
