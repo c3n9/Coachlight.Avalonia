@@ -13,12 +13,15 @@ public sealed class StepBuilder
 {
     private readonly string? _targetId;
     private readonly Func<Control?>? _targetProvider;
+    private readonly IReadOnlyList<string>? _targetIds;
+    private readonly Func<IEnumerable<Control?>>? _targetsProvider;
 
     private object? _title;
     private object? _content;
     private Side _placement = Side.Auto;
     private double _padding = 8;
     private double _radius = 8;
+    private int _anchorIndex = -1;
     private Action? _onEnter;
     private Action? _onExit;
 
@@ -26,6 +29,12 @@ public sealed class StepBuilder
     {
         _targetId = targetId;
         _targetProvider = targetProvider;
+    }
+
+    internal StepBuilder(IReadOnlyList<string>? targetIds, Func<IEnumerable<Control?>>? targetsProvider)
+    {
+        _targetIds = targetIds;
+        _targetsProvider = targetsProvider;
     }
 
     /// <summary>Sets the step title. Accepts a string or any object rendered via a <c>DataTemplate</c>.</summary>
@@ -43,6 +52,9 @@ public sealed class StepBuilder
     /// <summary>Sets the spotlight hole's padding around the target and its corner radius (in pixels).</summary>
     public StepBuilder Spotlight(double padding, double radius) { _padding = padding; _radius = radius; return this; }
 
+    /// <summary>For a multi-target step, anchors the card to the target at <paramref name="index"/> instead of the union of all holes.</summary>
+    public StepBuilder Anchor(int index) { _anchorIndex = index; return this; }
+
     /// <summary>Sets a callback invoked when this step becomes active (for example, to start a live demo or open a panel).</summary>
     public StepBuilder OnEnter(Action action) { _onEnter = action; return this; }
 
@@ -53,6 +65,9 @@ public sealed class StepBuilder
     {
         TargetId = _targetId,
         TargetProvider = _targetProvider,
+        TargetIds = _targetIds,
+        TargetsProvider = _targetsProvider,
+        AnchorIndex = _anchorIndex,
         Title = _title,
         Content = _content,
         Placement = _placement,

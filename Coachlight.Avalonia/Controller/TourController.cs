@@ -44,7 +44,11 @@ public sealed class TourController
     public bool IsLast => !HasShowableInRange(_index + 1, StepCount - 1);
 
     /// <summary>The resolved target control of <see cref="CurrentStep"/>, or <c>null</c> for a modal step or an unresolved target.</summary>
-    public Control? CurrentTarget => CurrentStep is { } step ? ResolveTarget(step) : null;
+    public Control? CurrentTarget => CurrentTargets.Count > 0 ? CurrentTargets[0] : null;
+
+    /// <summary>All resolved target controls of <see cref="CurrentStep"/> (one spotlight hole each). Empty for a modal step or when nothing resolves.</summary>
+    public IReadOnlyList<Control> CurrentTargets =>
+        CurrentStep is { } step ? ResolveTargets(step) : Array.Empty<Control>();
 
     /// <summary>Raised whenever the current step changes (including to <c>null</c> when the tour ends).</summary>
     public event EventHandler<TourStep?>? CurrentStepChanged;
@@ -52,15 +56,26 @@ public sealed class TourController
     /// <summary>Raised once when the tour ends, with the reason it ended.</summary>
     public event EventHandler<TourEndReason>? Ended;
 
-    /// <summary>Starts <paramref name="tour"/>, stopping any tour already in progress.</summary>
-    public void Start(Tour tour)
+    /// <summary>
+    /// Starts <paramref name="tour"/>, stopping any tour already in progress. Pass
+    /// <paramref name="startIndex"/> to begin at a later step — for example to resume a tour
+    /// that was interrupted — which keeps the step numbering of the whole tour intact. The
+    /// first showable step at or after <paramref name="startIndex"/> is shown; if there is
+    /// none — including when <paramref name="startIndex"/> is <see cref="Tour.Steps"/>.Count,
+    /// meaning "nothing left to show" — the tour completes immediately.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex"/> is negative, or past the end of <paramref name="tour"/>.</exception>
+    public void Start(Tour tour, int startIndex = 0)
     {
         ArgumentNullException.ThrowIfNull(tour);
+        ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(startIndex, tour.Steps.Count);
+
         if (IsActive) Stop();
         _tour = tour;
         _index = -1;
         _activeStep = null;
-        ShowStepFrom(0, +1);
+        ShowStepFrom(startIndex, +1);
     }
 
     /// <summary>Advances to the next showable step, or completes the tour if none remain.</summary>
@@ -149,16 +164,29 @@ public sealed class TourController
 
     private bool ShouldShow(TourStep step)
     {
-        var target = ResolveTarget(step);
-        if (target is null) return true;
-        return target.IsVisible && target.IsEffectivelyVisible;
+        if (step.IsModal) return true;
+        var targets = ResolveTargets(step);
+        if (targets.Count == 0) return true;                    
+        return targets.Any(t => t.IsVisible && t.IsEffectivelyVisible);
     }
 
-    private Control? ResolveTarget(TourStep step)
+    private IReadOnlyList<Control> ResolveTargets(TourStep step)
     {
-        if (step.TargetProvider is not null) return step.TargetProvider();
-        if (step.TargetId is not null) return _resolver?.ResolveById(step.TargetId);
-        return null;
+        if (step.TargetsProvider is not null)
+            return step.TargetsProvider().Where(c => c is not null).Select(c => c!).ToList();
+
+        if (step.TargetIds is { Count: > 0 })
+            return step.TargetIds
+                .Select(id => _resolver?.ResolveById(id))
+                .Where(c => c is not null).Select(c => c!).ToList();
+
+        if (step.TargetProvider is not null)
+            return step.TargetProvider() is { } c ? new[] { c } : Array.Empty<Control>();
+
+        if (step.TargetId is not null)
+            return _resolver?.ResolveById(step.TargetId) is { } c ? new[] { c } : Array.Empty<Control>();
+
+        return Array.Empty<Control>();
     }
 
     private bool HasShowableInRange(int from, int to)

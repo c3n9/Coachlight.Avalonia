@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cl="clr-namespace:Coachlight.Avalonia.Targeting;assembly=Coachlight.Avalonia"
+             xmlns:vm="clr-namespace:Coachlight.Gallery.ViewModels"
+             x:Class="Coachlight.Gallery.Views.ProfileView"
+             x:DataType="vm:ProfilePageViewModel">
+
+    <StackPanel Spacing="14" Margin="28" Width="360"
+                HorizontalAlignment="Left" VerticalAlignment="Top">
+        <TextBlock Text="Profile" FontSize="22" FontWeight="SemiBold" />
+        <TextBlock Text="This page has its own view model and its own tour — the one the demo starts with."
+                   Foreground="Gray" TextWrapping="Wrap" />
+
+        <TextBox x:Name="UserNameBox"
+                 cl:Coachmark.Id="userNameBox"
+                 Watermark="User name"
+                 Text="{Binding UserName}" />
+
+        <ComboBox x:Name="LanguageCombo"
+                  cl:Coachmark.Id="languageCombo"
+                  HorizontalAlignment="Stretch"
+                  ItemsSource="{Binding Languages}"
+                  SelectedItem="{Binding SelectedLanguage}" />
+
+        <CheckBox x:Name="RememberMeCheck"
+                  cl:Coachmark.Id="rememberMeCheck"
+                  Content="Remember me"
+                  IsChecked="{Binding RememberMe}" />
+
+        <!-- The hand-off button: clicks reach it through the spotlight hole, so the tour can
+             ask for a real click instead of another "Continue". -->
+        <Button x:Name="OpenMediaBtn"
+                cl:Coachmark.Id="openMediaBtn"
+                Margin="0,10,0,0"
+                Content="Open Media ➜"
+                Command="{Binding OpenMediaCommand}" />
+    </StackPanel>
+</UserControl>

@@ -19,11 +19,14 @@ public static class CoachlightExtensions
     /// </summary>
     /// <param name="anchor">Any control already attached to the target window; used to locate the overlay layer and the visual tree to search for targets.</param>
     /// <param name="tour">The tour to run, typically built with <see cref="Building.TourBuilder"/>.</param>
-    public static void StartTour(this Visual anchor, Tour tour)
+    /// <param name="startIndex">Step to start at. Defaults to the beginning; pass a later step to resume an interrupted tour without losing its step numbering.</param>
+    /// <returns>The controller driving the tour — use it to observe or end the tour it started.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex"/> is negative, or past the end of <paramref name="tour"/>.</exception>
+    public static TourController StartTour(this Visual anchor, Tour tour, int startIndex = 0)
     {
         ArgumentNullException.ThrowIfNull(anchor);
         ArgumentNullException.ThrowIfNull(tour);
-        Run(anchor, tour, store: null);
+        return Run(anchor, tour, store: null, startIndex);
     }
 
     /// <summary>
@@ -35,19 +38,22 @@ public static class CoachlightExtensions
     /// <param name="tour">The tour to run.</param>
     /// <param name="store">Where "completed" state is persisted, e.g. a <see cref="JsonProgressStore"/>.</param>
     /// <param name="force">If <c>true</c>, shows the tour even if <paramref name="store"/> reports it as completed.</param>
-    public static void StartTour(this Visual anchor, Tour tour, IProgressStore store, bool force = false)
+    /// <param name="startIndex">Step to start at. Defaults to the beginning; pass a later step to resume an interrupted tour without losing its step numbering.</param>
+    /// <returns>The controller driving the tour, or <c>null</c> if the tour was not shown because <paramref name="store"/> reports it as completed.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="startIndex"/> is negative, or past the end of <paramref name="tour"/>.</exception>
+    public static TourController? StartTour(this Visual anchor, Tour tour, IProgressStore store, bool force = false, int startIndex = 0)
     {
         ArgumentNullException.ThrowIfNull(anchor);
         ArgumentNullException.ThrowIfNull(tour);
         ArgumentNullException.ThrowIfNull(store);
 
         if (!force && store.IsCompleted(tour.Id))
-            return;
+            return null;
 
-        Run(anchor, tour, store);
+        return Run(anchor, tour, store, startIndex);
     }
 
-    private static void Run(Visual anchor, Tour tour, IProgressStore? store)
+    private static TourController Run(Visual anchor, Tour tour, IProgressStore? store, int startIndex)
     {
         var root = TopLevel.GetTopLevel(anchor) as Visual ?? anchor;
         var resolver = new VisualTreeTargetResolver(root);
@@ -64,6 +70,7 @@ public static class CoachlightExtensions
 
         var overlay = new CoachmarkOverlay(controller);
         overlay.Attach(anchor);
-        controller.Start(tour);
+        controller.Start(tour, startIndex);
+        return controller;
     }
 }
