@@ -39,8 +39,9 @@ public sealed class TourHost
             if (reason == TourEndReason.Stopped || onEnd is null)
                 return;
 
-            // Ended runs before the overlay is torn down, so starting the next tour straight
-            // from here would leave two overlays stacked for a moment.
+            // onEnd usually starts the next tour, which attaches another overlay. Post it so
+            // that happens on its own dispatcher turn rather than re-entrantly, while the
+            // controller that just ended is still raising this event.
             Dispatcher.UIThread.Post(() => onEnd(reason));
         };
     }

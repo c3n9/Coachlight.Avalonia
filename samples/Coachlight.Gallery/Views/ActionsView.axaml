@@ -14,6 +14,17 @@
             <TextBlock Text="{Binding Status, StringFormat='Status: {0}'}" Foreground="Gray" />
         </StackPanel>
 
+        <!-- Moves on every press and eventually hides itself, so the spotlight has something
+             that actually goes somewhere. -->
+        <Button x:Name="MoveBtn"
+                cl:Coachmark.Id="btnMove"
+                Content="Press me — I move"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="{Binding MovePosition}"
+                IsVisible="{Binding IsMoveTargetVisible}"
+                Command="{Binding MoveCommand}" />
+
         <!-- Placed in opposite corners on purpose: the multi-target step spotlights both at once,
              so the two holes end up far apart and the effect is obvious. -->
         <Button x:Name="ConnectBtn"

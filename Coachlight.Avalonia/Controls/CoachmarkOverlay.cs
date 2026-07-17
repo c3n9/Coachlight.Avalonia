@@ -22,7 +22,9 @@ internal sealed class CoachmarkOverlay : Canvas
     private readonly DispatcherTimer _refreshTimer;
     private DateTime _warmupUntil;
     private Rect? _prevSpot;
-    private bool _hasPrevSpot;
+    private IReadOnlyList<Rect>? _prevHoles;
+    private Size _prevSize;
+    private bool _hasPrevFrame;
 
     public CoachmarkOverlay(TourController controller)
     {
@@ -116,7 +118,7 @@ internal sealed class CoachmarkOverlay : Canvas
         if (step is null) return;
         SyncCard(step);
         _warmupUntil = DateTime.UtcNow + TimeSpan.FromMilliseconds(800);
-        _hasPrevSpot = false;
+        _hasPrevFrame = false;
 
         // Fade out the old content; Recompute fades it back in once the new position is ready.
         _card.Opacity = 0;
@@ -166,39 +168,59 @@ internal sealed class CoachmarkOverlay : Canvas
 
         var holes = step.IsModal ? null : BuildHoles(step);
 
+        // A target that isn't laid out yet resolves to no holes. Give it the warmup window to
+        // turn up before falling back to a centered card.
+        if (!step.IsModal && holes is null && DateTime.UtcNow < _warmupUntil)
+            return;
+
         // The card anchors to a single rect: the chosen target (AnchorIndex) or the union of
-        // all holes. That anchor also drives spot-stability (below), which is enough to stop
-        // the refresh timer once positions settle.
+        // all holes.
         Rect? spot = null;
         if (holes is { Count: > 0 })
-        {
-            _dim.Holes = holes;
-            _dim.CornerRadius = step.SpotlightRadius;
             spot = step.AnchorIndex >= 0 && step.AnchorIndex < holes.Count
                 ? holes[step.AnchorIndex]
                 : Union(holes);
-            PlaceCard(spot.Value, step.Placement);
-        }
-        else if (step.IsModal)
+
+        // The timer keeps polling for as long as a step is shown, because a target can move for
+        // reasons nothing here can subscribe to (a scroll, a relayout, an animated transform).
+        // Frames where nothing actually moved must therefore stay cheap: no card measure, no
+        // geometry rebuild. The overlay's own size matters too — it decides where the card is
+        // clamped and which side it flips to.
+        var size = new Size(width, height);
+        if (_hasPrevFrame && size == _prevSize && SpotEquals(spot, _prevSpot) && HolesEqual(holes, _prevHoles))
+            return;
+
+        _prevSpot = spot;
+        _prevHoles = holes;
+        _prevSize = size;
+        _hasPrevFrame = true;
+
+        if (spot is { } anchor)
         {
-            _dim.Holes = null;
-            CenterCard();
+            _dim.Holes = holes;
+            _dim.CornerRadius = step.SpotlightRadius;
+            PlaceCard(anchor, step.Placement);
         }
         else
         {
+            // Modal step, or a target that never showed up / has just gone away.
             _dim.Holes = null;
-            if (DateTime.UtcNow < _warmupUntil)
-                return;
             CenterCard();
         }
-
-        var stable = _hasPrevSpot && SpotEquals(spot, _prevSpot);
-        _prevSpot = spot;
-        _hasPrevSpot = true;
-        if (stable && DateTime.UtcNow >= _warmupUntil)
-            _refreshTimer.Stop();
     }
-    
+
+    private static bool HolesEqual(IReadOnlyList<Rect>? a, IReadOnlyList<Rect>? b)
+    {
+        if (a is null || b is null)
+            return a is null && b is null;
+        if (a.Count != b.Count)
+            return false;
+        for (var i = 0; i < a.Count; i++)
+            if (!SpotEquals(a[i], b[i]))
+                return false;
+        return true;
+    }
+
     private static bool SpotEquals(Rect? a, Rect? b)
     {
         if (a is null && b is null) return true;
