@@ -18,6 +18,9 @@ internal sealed class SpotlightDim : Control, ICustomHitTest
     public static readonly StyledProperty<IBrush?> FillProperty =
         AvaloniaProperty.Register<SpotlightDim, IBrush?>(nameof(Fill));
 
+    public static readonly StyledProperty<bool> HolesInteractiveProperty =
+        AvaloniaProperty.Register<SpotlightDim, bool>(nameof(HolesInteractive), true);
+
     static SpotlightDim()
     {
         AffectsRender<SpotlightDim>(HolesProperty, CornerRadiusProperty, FillProperty, BoundsProperty);
@@ -41,6 +44,17 @@ internal sealed class SpotlightDim : Control, ICustomHitTest
         set => SetValue(FillProperty, value);
     }
 
+    /// <summary>
+    /// When <c>true</c> (the default) points inside a hole are not hit, so pointer input falls
+    /// through to the target beneath. When <c>false</c> the whole dim is hit, including the holes,
+    /// blocking clicks on the target.
+    /// </summary>
+    public bool HolesInteractive
+    {
+        get => GetValue(HolesInteractiveProperty);
+        set => SetValue(HolesInteractiveProperty, value);
+    }
+
     public override void Render(DrawingContext context)
     {
         var bounds = Bounds;
@@ -55,6 +69,12 @@ internal sealed class SpotlightDim : Control, ICustomHitTest
         var bounds = Bounds;
         if(bounds.Width <= 0 || bounds.Height <= 0)
             return false;
+
+        // Non-interactive: capture everything within the dim, holes included, so clicks can't
+        // reach the target beneath.
+        if (!HolesInteractive)
+            return new Rect(bounds.Size).Contains(point);
+
         var geometry = _cache.Get(bounds.Width, bounds.Height, Holes, CornerRadius);
         return geometry.FillContains(point);
     }

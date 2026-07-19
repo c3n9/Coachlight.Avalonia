@@ -166,11 +166,15 @@ internal sealed class CoachmarkOverlay : Canvas
         var step = _controller.CurrentStep;
         if (step is null) { _refreshTimer.Stop(); return; }
 
+        _dim.HolesInteractive = step.AllowInteraction;
+
         var holes = step.IsModal ? null : BuildHoles(step);
 
-        // A target that isn't laid out yet resolves to no holes. Give it the warmup window to
-        // turn up before falling back to a centered card.
-        if (!step.IsModal && holes is null && DateTime.UtcNow < _warmupUntil)
+        // A visible target that isn't laid out yet resolves to no holes. Give it the warmup
+        // window to turn up before falling back to a centered card. A step that has no visible
+        // target at all (SkipIfMissing(false) over a hidden/absent control) will never grow a
+        // hole, so don't stall on it — centre the card straight away instead of blinking out.
+        if (!step.IsModal && holes is null && HasVisibleTarget() && DateTime.UtcNow < _warmupUntil)
             return;
 
         // The card anchors to a single rect: the chosen target (AnchorIndex) or the union of
@@ -227,6 +231,16 @@ internal sealed class CoachmarkOverlay : Canvas
         if (a is { } ra && b is { } rb)
             return Math.Abs(ra.X - rb.X) < 0.5 && Math.Abs(ra.Y - rb.Y) < 0.5
                                                && Math.Abs(ra.Width - rb.Width) < 0.5 && Math.Abs(ra.Height - rb.Height) < 0.5;
+        return false;
+    }
+
+    // Whether any resolved target is currently visible, and so might still grow a hole once it
+    // finishes laying out. If none are, the warmup window has nothing to wait for.
+    private bool HasVisibleTarget()
+    {
+        foreach (var target in _controller.CurrentTargets)
+            if (target.IsVisible && target.IsEffectivelyVisible)
+                return true;
         return false;
     }
 

@@ -23,8 +23,12 @@ public partial class ActionsPageViewModel : ObservableObject
     [ObservableProperty] private string _status = "Idle";
     [ObservableProperty] private Thickness _movePosition = MoveStops[0];
     [ObservableProperty] private bool _isMoveTargetVisible = true;
+    [ObservableProperty] private bool _isVanishTargetVisible = true;
 
     private int _moveStop;
+
+    private void ShowVanishTarget() => IsVanishTargetVisible = true;
+    private void HideVanishTarget() => IsVanishTargetVisible = false;
 
     [RelayCommand]
     private void Connect() => Status = "Connected";
@@ -54,6 +58,20 @@ public partial class ActionsPageViewModel : ObservableObject
             .Modal(s => s
                 .Title("The Actions page")
                 .Text("The third view model, with the third tour. Finish it and the Media tour resumes on its own."))
+            .Coachmark("btnVanish", s => s
+                .Placement(Side.Right)
+                .Interactive(false)
+                .OnEnter(ShowVanishTarget)
+                .Title("Look, don't touch")
+                .Text("Interactive(false) makes the overlay swallow clicks over the hole, so this button can't be pressed. Press Next — it's about to disappear."))
+            .Modal(s => s
+                .OnEnter(HideVanishTarget)
+                .Title("...and it's gone")
+                .Text("That button just set IsVisible=false. The very next step targets it — watch the tour skip straight past it."))
+            .Coachmark("btnVanish", s => s
+                //.SkipIfMissing(false)
+                .Title("Kept, even though it's gone")
+                .Text("Its target is hidden now. By default this step would be skipped, but SkipIfMissing(false) keeps it — shown as a centered card since there's nothing left to point at."))
             .Coachmark("btnConnect", s => s
                 .Placement(Side.Left)
                 .Title("Connect")

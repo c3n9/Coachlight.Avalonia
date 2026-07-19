@@ -21,6 +21,8 @@ public sealed class StepBuilder
     private Side _placement = Side.Auto;
     private double _padding = 8;
     private double _radius = 8;
+    private bool _allowInteraction = true;
+    private bool _skipIfMissing = true;
     private int _anchorIndex = -1;
     private Action? _onEnter;
     private Action? _onExit;
@@ -52,6 +54,20 @@ public sealed class StepBuilder
     /// <summary>Sets the spotlight hole's padding around the target and its corner radius (in pixels).</summary>
     public StepBuilder Spotlight(double padding, double radius) { _padding = padding; _radius = radius; return this; }
 
+    /// <summary>
+    /// Sets whether the spotlight hole is click-through: when <paramref name="allow"/> is <c>true</c>
+    /// (the default) the user can click the highlighted control directly; when <c>false</c> clicks
+    /// over the hole are captured by the overlay so the target can only be looked at.
+    /// </summary>
+    public StepBuilder Interactive(bool allow = true) { _allowInteraction = allow; return this; }
+
+    /// <summary>
+    /// Sets whether this step is skipped when its target can't be resolved. When <paramref name="skip"/>
+    /// is <c>true</c> (the default) the tour moves on to the next showable step; when <c>false</c> the
+    /// step is still shown, as a centered card. No effect on modal steps.
+    /// </summary>
+    public StepBuilder SkipIfMissing(bool skip = true) { _skipIfMissing = skip; return this; }
+
     /// <summary>For a multi-target step, anchors the card to the target at <paramref name="index"/> instead of the union of all holes.</summary>
     public StepBuilder Anchor(int index) { _anchorIndex = index; return this; }
 
@@ -73,6 +89,8 @@ public sealed class StepBuilder
         Placement = _placement,
         SpotlightPadding = _padding,
         SpotlightRadius = _radius,
+        AllowInteraction = _allowInteraction,
+        SkipIfMissing = _skipIfMissing,
         OnEnter = _onEnter,
         OnExit = _onExit,
     };

@@ -41,5 +41,15 @@
                 Width="200"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom" />
+
+        <!-- The first steps of the tour spotlight this one non-interactively, then hide it so the
+             step that follows has nothing to point at and gets skipped. -->
+        <Button x:Name="VanishBtn"
+                cl:Coachmark.Id="btnVanish"
+                Content="Look, don't touch"
+                Width="200"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                IsVisible="{Binding IsVanishTargetVisible}" />
     </Grid>
 </UserControl>

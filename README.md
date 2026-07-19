@@ -11,8 +11,9 @@ itself, MVVM-friendly, and fully re-themeable.
 
 
 - **Spotlight coachmarks** — dims the screen and cuts a rounded hole around the target control.
-  The target stays fully interactive (clicks pass through the hole) — you can even drive a live
-  demo while the step is shown (see `OnEnter`/`OnExit`).
+  By default the target stays interactive (clicks pass through the hole) — you can even drive a
+  live demo while the step is shown (see `OnEnter`/`OnExit`) — or block clicks with
+  `.Interactive(false)` for a look-only step.
 - **Any control can be a target** — buttons, text boxes, combo boxes, checkboxes, sliders, whole
   list boxes — targeting works off the control's actual on-screen bounds, not just buttons.
 - **Several targets per step** — one coachmark can spotlight a group of controls at once, each
@@ -117,6 +118,31 @@ beside the group as a whole, so it works even when the targets sit in opposite c
 ```
 
 Add `.Anchor(index)` to place the card next to one specific target instead of the whole group.
+
+## Click-through holes, and skipping missing targets
+
+By default the spotlight hole is click-through: the user can click the highlighted control right
+through it. Call `.Interactive(false)` to make the overlay swallow clicks over the hole instead —
+a look-only step where the target can be seen but not touched:
+
+```csharp
+.Coachmark("btnDelete", s => s
+    .Interactive(false)          // hole is dimmed-through: the button can't be clicked
+    .Title("Danger zone")
+    .Text("This is where you'd delete the project — but not right now."))
+```
+
+When a step's target can't be resolved (no control carries the id, the provider returned `null`,
+or the control is hidden), the step is **skipped** and the tour moves on to the next showable
+step. Opt out with `.SkipIfMissing(false)` to keep the step and show it as a centered card
+instead:
+
+```csharp
+.Coachmark("maybeMissing", s => s
+    .SkipIfMissing(false)        // shown as a centered card even if the target isn't there
+    .Title("Optional feature")
+    .Text("Shown even when this control isn't on screen."))
+```
 
 ## Resuming a tour, and handing off between tours
 

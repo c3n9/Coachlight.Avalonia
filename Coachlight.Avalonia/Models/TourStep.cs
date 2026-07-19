@@ -39,6 +39,22 @@ public sealed class TourStep
     /// <summary>Corner radius (px) of the spotlight hole.</summary>
     public double SpotlightRadius { get; init; } = 8;
 
+    /// <summary>
+    /// Whether the step is skipped when its target can't be resolved (id not in the visual tree,
+    /// provider returned null). When <c>true</c> (the default) the tour moves on to the next
+    /// showable step; when <c>false</c> the step is still shown, as a centered card. Has no effect
+    /// on modal steps, which have no target.
+    /// </summary>
+    public bool SkipIfMissing { get; init; } = true;
+
+    /// <summary>
+    /// Whether the spotlight hole lets pointer input through to the target beneath it. When
+    /// <c>true</c> (the default) the hole is "transparent" — the user can click the highlighted
+    /// control directly. When <c>false</c> the dim captures clicks over the hole too, so the
+    /// target can only be looked at, not interacted with.
+    /// </summary>
+    public bool AllowInteraction { get; init; } = true;
+
     /// <summary>Invoked when this step becomes active. Exceptions are swallowed so a broken demo cannot break tour navigation.</summary>
     public Action? OnEnter { get; init; }
 

@@ -5,8 +5,8 @@ namespace Coachlight.Avalonia.Controller;
 
 /// <summary>
 /// Drives a single <see cref="Tour"/>: tracks the current step, skips steps whose target is
-/// hidden, resolves targets through an <see cref="ITargetResolver"/>, and raises events the
-/// UI layer (the overlay) reacts to. Contains no Avalonia rendering logic of its own.
+/// hidden or can't be resolved, resolves targets through an <see cref="ITargetResolver"/>, and
+/// raises events the UI layer (the overlay) reacts to. Contains no Avalonia rendering logic of its own.
 /// </summary>
 public sealed class TourController
 {
@@ -166,8 +166,12 @@ public sealed class TourController
     {
         if (step.IsModal) return true;
         var targets = ResolveTargets(step);
-        if (targets.Count == 0) return true;                    
-        return targets.Any(t => t.IsVisible && t.IsEffectivelyVisible);
+        if (targets.Any(t => t.IsVisible && t.IsEffectivelyVisible))
+            return true;
+        // No visible target — the id resolves to nothing, the provider returned null, or every
+        // resolved control is hidden. Skip the step unless it opts out via SkipIfMissing(false),
+        // in which case it's still shown, as a centered card.
+        return !step.SkipIfMissing;
     }
 
     private IReadOnlyList<Control> ResolveTargets(TourStep step)
